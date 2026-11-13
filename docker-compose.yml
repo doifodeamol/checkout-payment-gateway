@@ -1,0 +1,22 @@
+services:
+  bank_simulator:
+    container_name: bank_simulator
+    image: bbyars/mountebank:2.8.1
+    ports:
+      - "2525:2525"
+      - "8080:8080"
+    command: --configfile /imposters/bank_simulator.ejs --allowInjection
+    volumes:
+      - type: bind
+        source: ./imposters
+        target: /imposters
+
+  payment_gateway:
+    build: .
+    container_name: payment_gateway
+    depends_on:
+      - bank_simulator
+    environment:
+      BANK_BASE_URL: http://bank_simulator:8080
+    ports:
+      - "8090:8090"
